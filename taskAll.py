@@ -1,63 +1,90 @@
 '''
-Винни-Пух попросил Вас посмотреть, есть ли в его стихах ритм.
- Поскольку разобраться в его кричалках не настолько просто,
-  насколько легко он их придумывает, Вам стоит написать программу.
-   Винни-Пух считает, что ритм есть, если число слогов (т.е. число
-    гласных букв) в каждой фразе стихотворения одинаковое. 
-    Фраза может состоять из одного слова, если во фразе несколько слов,
-     то они разделяются дефисами. Фразы отделяются друг от друга 
-     пробелами. Стихотворение  Винни-Пух вбивает в программу с 
-     клавиатуры. В ответе напишите “Парам пам-пам”, если с ритмом
-      все в порядке и “Пам парам”, если с ритмом все не в порядке
-*Пример:*
-
-**Ввод:** пара-ра-рам рам-пам-папам па-ра-па-да    
-    **Вывод:** Парам пам-пам  
+Задача 38: Дополнить телефонный справочник возможностью 
+изменения и удаления данных. Пользователь также может ввести имя 
+или фамилию, 
+и Вы должны реализовать функционал для изменения и удаления данных
 '''
+import functions
 
-def rhythm(str):
-    str = str.split()
-    list_1 = []
-    for word in str:
-        sum = 0
-        for i in word:
-            if i in 'аеёиоуыэюя':
-                sum += 1
-        list_1.append(sum)
-    return len(list_1) == list_1.count(list_1[0])
-    
-
-input_str = input("Введите строку: ")
-if rhythm(input_str):
-    print('Парам пам-пам')
-else:
-    print('Пам парам')
-
-''' 3адача 36: Напишите функцию print_operation_table(operation, 
-num_rows=6, num_columns=6), которая принимает в качестве аргумента 
-функцию, вычисляющую элемент по номеру строки и столбца. Аргументы 
-num_rows и num_columns указывают число строк и столбцов таблицы, 
-которые должны быть распечатаны. Нумерация строк и столбцов идет с 
-единицы (подумайте, почему не с нуля). Примечание: бинарной операцией 
-называется любая операция, у которой ровно два аргумента, как, 
-например, у операции умножения.
-*Пример:*
-
-**Ввод:** `print_operation_table(lambda x, y: x * y) ` 
-**Вывод:**
-1 2 3 4 5 6
-
-2 4 6 8 10 12 
-3 6 9 12 15 18 
-4 8 12 16 20 24
-5 10 15 20 25 30
-6 12 18 24 30 36
-'''
-
-def print_operation_table(operation, num_rows=6, num_columns=6):
-    a = [[operation(i, j) for j in range(1, num_columns + 1)] for i in range(1, num_rows + 1)]
-    for i in a:
-        print(*[f"{x:>3}" for x in i])
+while True:
+    print('1. вывод, 2. добавление 3. поиск 4. изменение 5. удаление')
+    mode = int(input())
+    if mode == 1:
+        functions.show_data()
+    elif mode == 2:
+        functions.add_data()
+    elif mode == 3:
+        functions.find_data()
+    elif mode == 4:
+        functions.change_data()
+    elif mode == 5:
+        functions.remove_data()
+    else:
+        print('Такого режима нет')
+        break
 
 
-print_operation_table(lambda x, y: x * y)
+def add_data() -> None:
+    '''Добавляет информацию в справочник'''
+    fio = input('Введите ФИО: ')
+    tel_number = input('Введите номер телефона: ')
+    with open('book.txt', 'a', encoding='utf-8') as f:
+        f.write(f'\n{fio}| {tel_number}')
+    print('Успешно!')
+
+
+def find_data() -> None:
+    '''Осуществляет поиск по справочнику'''
+    data = input('Введите данные для поиска: ')
+    with open('book.txt', 'r', encoding='utf-8') as f:
+        tel_book = f.read()
+    print("Результаты поиска: ")
+    print(search(tel_book, data))
+
+
+def search(book: str, info: str) -> str:
+    '''Находит в строке записи по определенному критерию поиска'''
+    book = book.split('\n')
+    return '\n'.join([post for post in book if info in post])
+
+
+def change_data() -> None:
+    '''Изменяет данные в справочнике'''
+    data = input('Введите имя или фамилию для изменения данных: ')
+    with open('book.txt', 'r', encoding='utf-8') as f:
+        tel_book = f.readlines()
+    changed = False
+    with open('book.txt', 'w', encoding='utf-8') as f:
+        for i, line in enumerate(tel_book):
+            if data in line:
+                print(f'Найдена запись: {line}')
+                new_fio = input('Введите новое ФИО: ')
+                new_tel_number = input('Введите новый номер телефона: ')
+                if len(new_fio) == 0:
+                    new_fio = line.split(' | ')[0]
+                if len(new_tel_number) == 0:
+                    new_tel_number = line.split(' | ')[1]
+                tel_book[i] = f'{new_fio} | {new_tel_number}\n'
+                print('Запись изменена успешно')
+                changed = True
+        f.writelines(tel_book)
+    if not changed:
+        print('Запись не найдена')
+
+
+def remove_data() -> None:
+    '''Удаляет данные из справочника'''
+    data = input('Введите имя или фамилию для удаления данных: ')
+    with open('book.txt', 'r', encoding='utf-8') as f:
+        tel_book = f.readlines()
+    deleted = False
+    with open('book.txt', 'w', encoding='utf-8') as f:
+        for line in tel_book:
+            if data not in line:
+                f.write(line)
+            else:
+                deleted = True
+        if deleted:
+            print('Запись удалена успешно')
+        else:
+            print('Запись не найдена')
